@@ -196,7 +196,7 @@ class Aichess():
                         self.isCheckMate(set_state)
                         if self.checkMate:
                             print('Check Mate')
-                            print('path=>', self.getPath(parent, state))
+                            self.pathToTarget = self.getPath(parent, state)
                             return
                         list_set_state = self.to_list(set_state)
                         copy_aichess = copy.deepcopy(current_aichess)
