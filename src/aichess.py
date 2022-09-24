@@ -98,64 +98,73 @@ class Aichess():
 
     def do_movement(self, standard_current_state, standard_next_state):
         start = [e for e in standard_current_state if e not in standard_next_state]
-        to = [e for e in standard_current_state if e not in standard_current_state]
-
+        to = [e for e in standard_next_state if e not in standard_current_state]
         start, to = start[0][0:2], to[0][0:2]
         self.chess.moveSim(start, to)
 
     def isCheckMate(self, mystate):
 
         # Your Code
+        checkMateState = [
+            {(0,0,2),(2,4,6)},
+            {(0,1,2),(2,4,6)},
+            {(0,2,2),(2,4,6)},
+            {(0,3,2),(2,4,6)},
+            {(0,5,2),(2,4,6)},
+            {(0,6,2),(2,4,6)},
+            {(0,7,2),(2,4,6)}
+        ]
 
-        checkMateState = np.array([
-            [[0, 0, 2], [2, 4, 6]],
-            [[0, 1, 2], [2, 4, 6]],
-            [[0, 2, 2], [2, 4, 6]],
-            [[0, 3, 2], [2, 4, 6]],
-            [[0, 5, 2], [2, 4, 6]],
-            [[0, 6, 2], [2, 4, 6]],
-            [[0, 7, 2], [2, 4, 6]],
-        ])
+        self.checkMate = (mystate in checkMateState)
+        return self.checkMate
 
-        self.checkMate = mystate in checkMateState
+    def to_set(self, state):
+        set_of_states = set()
+
+        for piece in state:
+            tup = tuple(piece)
+            set_of_states.add(tup)
+        return set_of_states
+
 
     def DepthFirstSearch(self, currentState, depth):
-
+        
+        path = []
+        self.listVisitedStates.append(self.to_set(currentState))
         # Your Code here
-
-        stack = [(currentState,depth)]
-        move = {}
-
-
-        while stack:
-
-            current_node, current_depth = stack.pop()
-
-            self.checkMate(current_node)
+        def backtraking(currentState, depth):
             if self.checkMate:
-                return
-
+                return True
             if depth == self.depthMax:
-                raise TimeoutError('TimeoutError')
+                return False
+
+            list_of_states = self.getListNextStatesW(currentState)
+            
+            for state in list_of_states:
+                set_state = self.to_set(state)
+
+                if set_state not in self.listVisitedStates:
+                    self.listVisitedStates.append(set_state)
+                    self.isCheckMate(set_state)
+                    path.append(state)
+                    self.do_movement(currentState, state)
+                    if backtraking(state, depth+1):
+                        self.pathToTarget = path
+                        return True
+                    self.do_movement(state, currentState)
+                    path.pop()          
+           
+        return backtraking(currentState, depth)
+
+
 
             
-
-            self.getListNextStatesW(current_node)
-            neighbor = self.listNextStates
-
-            for nei in neighbor:
-                if self.isVisited(nei):
-                    continue
-                else:
-                    self.listVisitedStates.append(nei)
-                    stack.append(nei)
-            depth = depth + 1
-        
 
     def BreadthFirstSearch(self, currentState):
 
         # Your Code here
         return
+
     def BestFirstSearch(self, currentState):
 
         # Your Code here
@@ -228,8 +237,8 @@ if __name__ == "__main__":
     # aichess.chess.boardSim.listVisitedStates = []
     # find the shortest path, initial depth 0
     depth = 0
-    aichess.BreadthFirstSearch(currentState)
-    #aichess.DepthFirstSearch(currentState, depth)
+    # aichess.BreadthFirstSearch(currentState)
+    aichess.DepthFirstSearch(currentState, depth)
 
     # MovesToMake = ['1e','2e','2e','3e','3e','4d','4d','3c']
 
