@@ -173,7 +173,7 @@ class Aichess():
     @currentState: start board State
     @depth: depth of current States Tree
     '''
-    def BreadthFirstSearch(self, currentState, depth=0):
+    def BreadthFirstSearch(self, currentState):
         # Your Code here
 
         #Queue need to store the current state, depth and copyed Aichess class
@@ -181,7 +181,7 @@ class Aichess():
         #Store prev State
         parent = defaultdict()
 
-        q.put((currentState, depth, copy.deepcopy(self)))
+        q.put((currentState, 0, copy.deepcopy(self)))
 
         init_set_state = self.to_set(currentState)
         self.listVisitedStates.append(init_set_state)
