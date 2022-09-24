@@ -168,6 +168,11 @@ class Aichess():
         result.pop()
         result.reverse()
         return result
+
+    '''
+    @currentState: start board State
+    @depth: depth of current States Tree
+    '''
     def BreadthFirstSearch(self, currentState, depth=0):
         # Your Code here
 
@@ -180,10 +185,12 @@ class Aichess():
 
         init_set_state = self.to_set(currentState)
         self.listVisitedStates.append(init_set_state)
+
         parent[frozenset(init_set_state)] = None
 
         while q:
             current_state, current_depth, current_aichess = q.get()
+
 
             if current_depth <= self.depthMax:
                 list_of_states = current_aichess.getListNextStatesW(current_state)
@@ -202,11 +209,6 @@ class Aichess():
                         copy_aichess = copy.deepcopy(current_aichess)
                         copy_aichess.do_movement(current_state, list_set_state)
                         q.put((list_set_state,current_depth+1, copy_aichess))
-
-                    
-
-
-
 
 
     def AStarSearch(self, currentState):
