@@ -13,6 +13,7 @@ import numpy as np
 import sys
 import queue
 from typing import List
+from collections import defaultdict
 
 RawStateType = List[List[List[int]]]
 
@@ -116,7 +117,6 @@ class Aichess():
         ]
 
         self.checkMate = (mystate in checkMateState)
-        return self.checkMate
 
     def to_set(self, state):
         set_of_states = set()
@@ -124,8 +124,9 @@ class Aichess():
         for piece in state:
             tup = tuple(piece)
             set_of_states.add(tup)
-        return set_of_states
-
+        return set_of_states        
+    def to_list(self, state):
+        return [list(e) for e in state]
 
     def DepthFirstSearch(self, currentState, depth):
         
@@ -139,7 +140,7 @@ class Aichess():
                 return False
 
             list_of_states = self.getListNextStatesW(currentState)
-            
+
             for state in list_of_states:
                 set_state = self.to_set(state)
 
@@ -154,21 +155,59 @@ class Aichess():
                     self.do_movement(state, currentState)
                     path.pop()          
            
-        return backtraking(currentState, depth)
+        backtraking(currentState, depth)
 
+    def getPath (self, parent, start):
+        result = []
+        node = start
 
-
-            
-
-    def BreadthFirstSearch(self, currentState):
-
+        while node != None:
+            result.append(node)
+            prev = parent[frozenset(self.to_set(node))]
+            node = prev
+        result.pop()
+        result.reverse()
+        return result
+    def BreadthFirstSearch(self, currentState, depth=0):
         # Your Code here
-        return
 
-    def BestFirstSearch(self, currentState):
+        #Queue need to store the current state, depth and copyed Aichess class
+        q = queue.Queue()
+        #Store prev State
+        parent = defaultdict()
 
-        # Your Code here
-        return
+        q.put((currentState, depth, copy.deepcopy(self)))
+
+        init_set_state = self.to_set(currentState)
+        self.listVisitedStates.append(init_set_state)
+        parent[frozenset(init_set_state)] = None
+
+        while q:
+            current_state, current_depth, current_aichess = q.get()
+
+            if current_depth <= self.depthMax:
+                list_of_states = current_aichess.getListNextStatesW(current_state)
+
+                for state in list_of_states:
+                    set_state = self.to_set(state)
+                    if set_state not in self.listVisitedStates:
+                        self.listVisitedStates.append(set_state)
+                        parent[frozenset(set_state)] = current_state
+                        self.isCheckMate(set_state)
+                        if self.checkMate:
+                            print('Check Mate')
+                            print('path=>', self.getPath(parent, state))
+                            return
+                        list_set_state = self.to_list(set_state)
+                        copy_aichess = copy.deepcopy(current_aichess)
+                        copy_aichess.do_movement(current_state, list_set_state)
+                        q.put((list_set_state,current_depth+1, copy_aichess))
+
+                    
+
+
+
+
 
     def AStarSearch(self, currentState):
 
@@ -237,8 +276,8 @@ if __name__ == "__main__":
     # aichess.chess.boardSim.listVisitedStates = []
     # find the shortest path, initial depth 0
     depth = 0
-    # aichess.BreadthFirstSearch(currentState)
-    aichess.DepthFirstSearch(currentState, depth)
+    aichess.BreadthFirstSearch(currentState)
+    #aichess.DepthFirstSearch(currentState, depth)
 
     # MovesToMake = ['1e','2e','2e','3e','3e','4d','4d','3c']
 
