@@ -15,6 +15,8 @@ import queue
 from typing import List
 from collections import defaultdict
 
+import timeit
+
 RawStateType = List[List[List[int]]]
 
 
@@ -110,8 +112,6 @@ class Aichess():
             {(0,0,2),(2,4,6)},
             {(0,1,2),(2,4,6)},
             {(0,2,2),(2,4,6)},
-            {(0,3,2),(2,4,6)},
-            {(0,5,2),(2,4,6)},
             {(0,6,2),(2,4,6)},
             {(0,7,2),(2,4,6)}
         ]
@@ -205,10 +205,9 @@ class Aichess():
                             print('Check Mate')
                             self.pathToTarget = self.getPath(parent, state)
                             return
-                        list_set_state = self.to_list(set_state)
                         copy_aichess = copy.deepcopy(current_aichess)
-                        copy_aichess.do_movement(current_state, list_set_state)
-                        q.put((list_set_state,current_depth+1, copy_aichess))
+                        copy_aichess.do_movement(current_state, state)
+                        q.put((state,current_depth+1, copy_aichess))
 
     def calculate_dis(self, state):
         black_king = self.chess.boardSim.currentStateB[0]
@@ -224,7 +223,7 @@ class Aichess():
         #If the piece is a King using chebyshev distance
         elif piece_type == 6:
             return max(abs(x1 - x2), abs(y1 - y2))
-
+        
     def all_distance(self, states):
         for state in states:
             yield self.calculate_dis(state)
@@ -262,7 +261,7 @@ class Aichess():
                             return
                         copy_aichess = copy.deepcopy(current_aichess)
                         copy_aichess.do_movement(current_state, state)
-                        q.put((sum(self.all_distance(state)), state, current_depth+1, copy_aichess))
+                        q.put((max(self.all_distance(state))+current_depth, state, current_depth+1, copy_aichess))
 
 def translate(s):
     """
@@ -325,9 +324,15 @@ if __name__ == "__main__":
     # aichess.chess.boardSim.listVisitedStates = []
     # find the shortest path, initial depth 0
     depth = 0
+    
+    start = timeit.default_timer()
+    
     #aichess.BreadthFirstSearch(currentState)
-    #aichess.DepthFirstSearch(currentState, depth)
-    aichess.AStarSearch(currentState)
+    aichess.DepthFirstSearch(currentState, depth)
+    #aichess.AStarSearch(currentState)
+    
+    stop = timeit.default_timer()
+    print('Time: ', stop - start) 
 
     # MovesToMake = ['1e','2e','2e','3e','3e','4d','4d','3c']
 
