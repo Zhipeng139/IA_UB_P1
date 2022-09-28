@@ -210,12 +210,59 @@ class Aichess():
                         copy_aichess.do_movement(current_state, list_set_state)
                         q.put((list_set_state,current_depth+1, copy_aichess))
 
+    def calculate_dis(self, state):
+        black_king = self.chess.boardSim.currentStateB[0]
 
-    def AStarSearch(self, currentState):
+        x1, y1 = black_king[0:2]
+        x2, y2 = state[0:2]
+
+        piece_type = state[2]
+
+        #If the piece is a Rook using manhattan distance
+        if piece_type == 2:
+            return abs(x1 - x2)+abs(y1 - y2)
+        #If the piece is a King using chebyshev distance
+        elif piece_type == 6:
+            return max(abs(x1 - x2), abs(y1 - y2))
+
+    def all_distance(self, states):
+        for state in states:
+            yield self.calculate_dis(state)
+
+    def AStarSearch(self, currentState, depth = 0):
 
         # Your Code here
-        return
+        #Store the current distance, current state, depth and copyed Aichess class
+        q = queue.PriorityQueue()
+        q.put((sum(self.all_distance(currentState)), currentState, depth ,copy.deepcopy(self)))
 
+        #Store prev State
+        parent = defaultdict()
+
+        init_set_state = self.to_set(currentState)
+        self.listVisitedStates.append(init_set_state)
+
+        parent[frozenset(init_set_state)] = None
+
+        while q:
+            current_dist, current_state, current_depth, current_aichess = q.get()
+
+            if current_depth <= self.depthMax:
+                list_of_states = current_aichess.getListNextStatesW(current_state)
+
+                for state in list_of_states:
+                    set_state = self.to_set(state)
+
+                    if set_state not in self.listVisitedStates:
+                        self.listVisitedStates.append(set_state)
+                        parent[frozenset(set_state)] = current_state
+                        self.isCheckMate(set_state)
+                        if self.checkMate:
+                            self.pathToTarget = self.getPath(parent, state)
+                            return
+                        copy_aichess = copy.deepcopy(current_aichess)
+                        copy_aichess.do_movement(current_state, state)
+                        q.put((sum(self.all_distance(state)), state, current_depth+1, copy_aichess))
 
 def translate(s):
     """
@@ -278,8 +325,9 @@ if __name__ == "__main__":
     # aichess.chess.boardSim.listVisitedStates = []
     # find the shortest path, initial depth 0
     depth = 0
-    aichess.BreadthFirstSearch(currentState)
+    #aichess.BreadthFirstSearch(currentState)
     #aichess.DepthFirstSearch(currentState, depth)
+    aichess.AStarSearch(currentState)
 
     # MovesToMake = ['1e','2e','2e','3e','3e','4d','4d','3c']
 
