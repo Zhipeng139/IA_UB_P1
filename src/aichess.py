@@ -125,8 +125,6 @@ class Aichess():
             tup = tuple(piece)
             set_of_states.add(tup)
         return set_of_states        
-    def to_list(self, state):
-        return [list(e) for e in state]
 
     def DepthFirstSearch(self, currentState, depth):
         
@@ -297,7 +295,7 @@ if __name__ == "__main__":
     # TA[0][4] = 12
 
     TA[7][0] = 2
-    TA[7][4] = 6
+    TA[7][7] = 6
     TA[0][4] = 12
 
     #TA[0][0] = 2
@@ -328,8 +326,8 @@ if __name__ == "__main__":
     start = timeit.default_timer()
     
     #aichess.BreadthFirstSearch(currentState)
-    aichess.DepthFirstSearch(currentState, depth)
-    #aichess.AStarSearch(currentState)
+    #aichess.DepthFirstSearch(currentState, depth)
+    aichess.AStarSearch(currentState)
     
     stop = timeit.default_timer()
     print('Time: ', stop - start) 
