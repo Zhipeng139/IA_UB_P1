@@ -100,13 +100,29 @@ class Aichess():
             return False
 
     def do_movement(self, standard_current_state, standard_next_state):
+        '''
+
+        Args:
+            standard_current_state: current state of board
+            standard_next_state: next state of board
+
+        Returns: the movement of pieces
+
+        '''
         start = [e for e in standard_current_state if e not in standard_next_state]
         to = [e for e in standard_next_state if e not in standard_current_state]
         start, to = start[0][0:2], to[0][0:2]
         self.chess.moveSim(start, to)
 
     def isCheckMate(self, mystate):
+        '''
 
+        Args:
+            mystate: current state
+
+        Returns: if the state is checkmate
+
+        '''
         # Your Code
         checkMateState = [
             {(0,0,2),(2,4,6)},
@@ -119,19 +135,29 @@ class Aichess():
         self.checkMate = (mystate in checkMateState)
 
     def to_set(self, state):
-        set_of_states = set()
+        '''
+
+        Args:
+            state: state which want to change to a set
+
+        Returns: a state with set type
+
+        '''
+        set_of_state = set()
 
         for piece in state:
             tup = tuple(piece)
             set_of_states.add(tup)
-        return set_of_states        
+        return set_of_state
 
     def DepthFirstSearch(self, currentState, depth):
-        
+
+        # list to store the final path
         path = []
         self.listVisitedStates.append(self.to_set(currentState))
-        # Your Code here
         def backtraking(currentState, depth):
+
+            # verify if is the end case
             if self.checkMate:
                 return True
             if depth == self.depthMax:
@@ -139,9 +165,11 @@ class Aichess():
 
             list_of_states = self.getListNextStatesW(currentState)
 
+            # expanded the list of next states
             for state in list_of_states:
                 set_state = self.to_set(state)
 
+                # do movement and add the state to path if the state is not visited
                 if set_state not in self.listVisitedStates:
                     self.listVisitedStates.append(set_state)
                     self.isCheckMate(set_state)
@@ -150,12 +178,25 @@ class Aichess():
                     if backtraking(state, depth+1):
                         self.pathToTarget = path
                         return True
+
+                    # if the movement is wrong, do backtracking and cancel the movement
                     self.do_movement(state, currentState)
                     path.pop()          
            
         backtraking(currentState, depth)
 
     def getPath (self, parent, start):
+        '''
+
+        Args:
+            parent: diccionary which recorded the parent state of current state
+            start: the first state
+
+        Returns: a list of states
+
+        '''
+
+        # list to store the result path
         result = []
         node = start
 
@@ -167,16 +208,18 @@ class Aichess():
         result.reverse()
         return result
 
-    '''
-    @currentState: start board State
-    @depth: depth of current States Tree
-    '''
     def BreadthFirstSearch(self, currentState):
-        # Your Code here
+        '''
+
+        Args:
+            currentState: start board State
+
+        '''
 
         #Queue need to store the current state, depth and copyed Aichess class
         q = queue.Queue()
-        #Store prev State
+
+        # dictionary to store the previous state
         parent = defaultdict()
 
         q.put((currentState, 0, copy.deepcopy(self)))
@@ -187,14 +230,17 @@ class Aichess():
         parent[frozenset(init_set_state)] = None
 
         while q:
+            # get first element of queue
             current_state, current_depth, current_aichess = q.get()
-
 
             if current_depth <= self.depthMax:
                 list_of_states = current_aichess.getListNextStatesW(current_state)
 
+                # expanded the next states
                 for state in list_of_states:
                     set_state = self.to_set(state)
+
+                    # do movement if the state is not visited
                     if set_state not in self.listVisitedStates:
                         self.listVisitedStates.append(set_state)
                         parent[frozenset(set_state)] = current_state
@@ -222,18 +268,17 @@ class Aichess():
         elif piece_type == 6:
             return max(abs(x1 - x2), abs(y1 - y2))
         
-    def all_distance(self, states):
+    def all_distance(self, states): # return the all of distances of 2 pieces
         for state in states:
             yield self.calculate_dis(state)
 
     def AStarSearch(self, currentState, depth = 0):
 
-        # Your Code here
-        #Store the current distance, current state, depth and copyed Aichess class
+        #Store the current distance, current state, depth and copyed Aichess class using a priority queue
         q = queue.PriorityQueue()
         q.put((sum(self.all_distance(currentState)), currentState, depth ,copy.deepcopy(self)))
 
-        #Store prev State
+        # dictionary to store the previous state
         parent = defaultdict()
 
         init_set_state = self.to_set(currentState)
@@ -242,14 +287,18 @@ class Aichess():
         parent[frozenset(init_set_state)] = None
 
         while q:
+
+            # get first element of queue
             current_dist, current_state, current_depth, current_aichess = q.get()
 
             if current_depth <= self.depthMax:
                 list_of_states = current_aichess.getListNextStatesW(current_state)
 
+                # expanded the next states
                 for state in list_of_states:
                     set_state = self.to_set(state)
 
+                    # do movement if the state is not visited
                     if set_state not in self.listVisitedStates:
                         self.listVisitedStates.append(set_state)
                         parent[frozenset(set_state)] = current_state
