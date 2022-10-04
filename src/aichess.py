@@ -53,8 +53,7 @@ class Aichess():
         self.checkMate = False
 
     def getCurrentState(self):
-
-        return self.myCurrentStateW
+        return self.CurrentStateW
 
     def getListNextStatesW(self, myState):
 
@@ -246,12 +245,17 @@ class Aichess():
                         parent[frozenset(set_state)] = current_state
                         self.isCheckMate(set_state)
                         if self.checkMate:
-                            print('Check Mate')
                             self.pathToTarget = self.getPath(parent, state)
+                            for state in self.pathToTarget:                                
+                                self.do_movement(currentState, state)
+                                currentState = state
                             return
                         copy_aichess = copy.deepcopy(current_aichess)
                         copy_aichess.do_movement(current_state, state)
                         q.put((state,current_depth+1, copy_aichess))
+        
+
+
 
     def calculate_dis(self, state):
         black_king = self.chess.boardSim.currentStateB[0]
@@ -305,6 +309,9 @@ class Aichess():
                         self.isCheckMate(set_state)
                         if self.checkMate:
                             self.pathToTarget = self.getPath(parent, state)
+                            for state in self.pathToTarget:                                
+                                self.do_movement(currentState, state)
+                                currentState = state
                             return
                         copy_aichess = copy.deepcopy(current_aichess)
                         copy_aichess.do_movement(current_state, state)
@@ -330,26 +337,13 @@ def translate(s):
         print(s + "is not in the format '[number][letter]'")
         return None
 
-
 if __name__ == "__main__":
-    #   if len(sys.argv) < 2:
-    #       sys.exit(usage())
 
-    # intiialize board
     TA = np.zeros((8, 8))
-    # white pieces
-    # TA[0][0] = 2
-    # TA[2][4] = 6
-    # # black pieces
-    # TA[0][4] = 12
 
     TA[7][0] = 2
-    TA[7][7] = 6
+    TA[7][4] = 6
     TA[0][4] = 12
-
-    #TA[0][0] = 2
-    #TA[1][0] = 6
-    #TA[0][1] = 12
 
     # initialise board
     print("stating AI chess... ")
@@ -367,38 +361,13 @@ if __name__ == "__main__":
     #   aichess.getListNextStatesW([[7,4,2],[7,4,6]])
     print("list next states ", aichess.listNextStates)
 
-    # starting from current state find the end state (check mate) - recursive function
-    # aichess.chess.boardSim.listVisitedStates = []
-    # find the shortest path, initial depth 0
-    depth = 0
-    
-    start = timeit.default_timer()
-    
+    depth = 0    
     #aichess.BreadthFirstSearch(currentState)
     aichess.DepthFirstSearch(currentState, depth)
     #aichess.AStarSearch(currentState)
-    
-    stop = timeit.default_timer()
-    print('Time: ', stop - start) 
 
-    # MovesToMake = ['1e','2e','2e','3e','3e','4d','4d','3c']
-
-    # for k in range(int(len(MovesToMake)/2)):
-
-    #     print("k: ",k)
-
-    #     print("start: ",MovesToMake[2*k])
-    #     print("to: ",MovesToMake[2*k+1])
-
-    #     start = translate(MovesToMake[2*k])
-    #     to = translate(MovesToMake[2*k+1])
-
-    #     print("start: ",start)
-    #     print("to: ",to)
-
-    #     aichess.chess.moveSim(start, to)
-
-    # aichess.chess.boardSim.print_board()
     print("#Move sequence...  ", aichess.pathToTarget)
     print("#Visited sequence...  ", aichess.listVisitedStates)
     print("#Current State...  ", aichess.chess.board.currentStateW)
+    print("#Final Board")
+    aichess.chess.boardSim.print_board()
